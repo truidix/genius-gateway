@@ -1428,8 +1428,11 @@ void GeniusDevicesService::_syncSmokeDetectorSubDevices()
                     it->second.device->unpublishAll();
                     if (it->second.diagnostics)
                         it->second.diagnostics->unpublishAll();
-                    // Give HA time to process the removals before the new configs arrive
-                    vTaskDelay(pdMS_TO_TICKS(500));
+                    // Give HA time to finish removing the old entities (incl. their registry
+                    // entries) before the new configs arrive. If the new config lands while the
+                    // old entity is still being removed, HA treats it as an update of the same
+                    // entity and keeps the old entity_id. Zigbee2MQTT waits about 2 s here too.
+                    vTaskDelay(pdMS_TO_TICKS(2500));
                 }
 
                 id.name = newName;
