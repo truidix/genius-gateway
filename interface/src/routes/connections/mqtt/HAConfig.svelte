@@ -188,8 +188,10 @@
 						<Info class="h-6 w-6 shrink-0 stroke-current" />
 						<span
 							>Detectors are named after their location in Home Assistant. When the location changes, the
-							detector's entities are removed and re-created so Home Assistant generates new entity IDs. Their
-							history is lost and automations or dashboards that use the old IDs must be updated.</span
+							detector's entities are removed and re-created so Home Assistant generates new entity IDs. The
+							history of the old entities is NOT carried over (the new entities start without history), and
+							automations or dashboards that use the old IDs must be updated. To keep the history, leave this
+							option off and rename the entity IDs inside Home Assistant instead.</span
 						>
 					</div>
 				{/if}

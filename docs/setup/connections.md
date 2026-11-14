@@ -130,7 +130,9 @@ Opt-in, off by default, and only shown while the integration is enabled. Home As
 With this option enabled, detectors are named after their location in Home Assistant (the model name is used if no location is set). When the location of a detector changes, the gateway removes its entities from Home Assistant and publishes them again together with an explicit entity ID built from the new name (e.g. `sensor.julian_alarm_line`). This needs a Home Assistant version that supports `default_entity_id` in MQTT discovery (tested with 2026.11).
 
 !!! warning "History and references are lost"
-    The old entities are removed, so their recorded history is not carried over. Automations, scripts and dashboards that reference the old entity IDs must be updated. Two detectors with the same location get a numeric suffix (`_2`) from Home Assistant.
+    The old entities are removed and new ones are created, so **their recorded history (and long-term statistics) is not carried over**: Home Assistant stores history per entity ID, and the new entities start empty. The old history stays under the old IDs. Zigbee2MQTT's "Update Home Assistant entity ID" rename behaves the same way. Automations, scripts and dashboards that reference the old entity IDs must be updated. Two detectors with the same location get a numeric suffix (`_2`) from Home Assistant.
+
+    To keep the history, leave this option off and rename the entity IDs in Home Assistant itself (device page, entity settings, *Recreate entity IDs* / change the entity ID). Home Assistant then migrates the history to the new ID.
 
 **Manufacturer / Model**
 
