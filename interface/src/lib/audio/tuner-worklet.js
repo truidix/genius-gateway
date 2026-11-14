@@ -1,3 +1,4 @@
+// @ts-nocheck - plain-JS DSP code running in an AudioWorklet; not covered by checkJs (51 implicit-any / null diagnostics).
 // ============================================================
 // Hekatron SmartSonic Decoder - AudioWorklet processor
 //
