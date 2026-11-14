@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { goto } from '$app/navigation';
+	import { goto, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import { modals } from 'svelte-modals';
+	import { untrack } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { user } from '$lib/stores/user';
@@ -1064,6 +1065,52 @@
 			onSetLine: () => handleEdit(index)
 		});
 	}
+
+	/**
+	 * Deep links from the overview cards: `?details=<id>` opens the Device Details dialog,
+	 * `?alarmlog=<id>` opens the Alarm Log of that device. The parameter is stripped right
+	 * after use so a reload or the back button does not reopen the dialog.
+	 *
+	 * The effect itself only tracks the URL, the device list state and the admin flag; opening
+	 * a modal reads and writes reactive state, so the action runs untracked (otherwise the
+	 * effect would re-trigger itself). `handledDeepLink` guards against handling the same link
+	 * twice while the URL update is still pending.
+	 */
+	let handledDeepLink: string | null = null;
+	$effect(() => {
+		const loaded = geniusDevices.isLoaded;
+		const isAdmin = $user.admin;
+		const params = page.url.searchParams;
+		const detailsId = params.get('details');
+		const alarmLogId = params.get('alarmlog');
+		const requestedId = alarmLogId ?? detailsId;
+
+		if (requestedId === null) {
+			handledDeepLink = null;
+			return;
+		}
+		if (!loaded || !isAdmin) return;
+
+		const key = `${alarmLogId !== null ? 'alarmlog' : 'details'}:${requestedId}`;
+		if (key === handledDeepLink) return;
+		handledDeepLink = key;
+
+		untrack(() => {
+			const url = new URL(page.url);
+			url.searchParams.delete('details');
+			url.searchParams.delete('alarmlog');
+			replaceState(url, page.state);
+
+			const index = geniusDevices.devices.findIndex((d) => String(d.id) === requestedId);
+			if (index < 0) return; // unknown or deleted device - just show the list
+
+			if (alarmLogId !== null && geniusDevices.devices[index].alarms.length > 0) {
+				handleAlarmLog(index);
+			} else {
+				openDeviceDetails(index);
+			}
+		});
+	});
 
 	let pdfGenerating = $state(false);
 

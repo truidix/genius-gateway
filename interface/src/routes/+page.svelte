@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import type { GeniusDevice } from '$lib/types/models';
 	import { modals } from 'svelte-modals';
 	import { geniusDevices } from '$lib/stores/geniusDevices.svelte';
 	import { user } from '$lib/stores/user';
@@ -16,6 +17,12 @@
 	}
 
 	let { data }: Props = $props();
+
+	/** Alarming devices open their alarm log, all others their details dialog. */
+	function deviceLink(device: GeniusDevice): string {
+		const param = device.isAlarming ? 'alarmlog' : 'details';
+		return `/gateway/smoke-detectors?${param}=${device.id}`;
+	}
 
 	async function postEndAlarms(blockingTime: number) {
 		try {
@@ -73,13 +80,22 @@
 					</div>
 				{/if}
 				{#each geniusDevices.devices as device (device.id)}
-					<a
-						href="/gateway/smoke-detectors"
-						aria-label="Open smoke detectors page"
-						class="block w-full max-w-120 hover:scale-[1.03] active:scale-[0.97] transition-transform"
-					>
-						<DeviceStatusCard detector={device} />
-					</a>
+					{#if $user.admin}
+						<a
+							href={deviceLink(device)}
+							aria-label={device.isAlarming
+								? `Open alarm log of ${device.location}`
+								: `Open details of ${device.location}`}
+							class="block w-full max-w-120 hover:scale-[1.03] active:scale-[0.97] transition-transform"
+						>
+							<DeviceStatusCard detector={device} />
+						</a>
+					{:else}
+						<!-- Device management is admin-only, so non-admins get a plain, non-clickable card. -->
+						<div class="block w-full max-w-120">
+							<DeviceStatusCard detector={device} />
+						</div>
+					{/if}
 				{/each}
 			{:else}
 				<div class="col-span-full">
