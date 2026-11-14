@@ -9,6 +9,12 @@ Measure how well each radio module is heard **directly** by the gateway - bypass
 - **New "SignalProbe" alarm-line acquisition source**: a device's alarm line can be acquired/confirmed from a direct-range survey response, alongside the existing sources
 - **PDF report "Direct Link (Signal / Range Test)" section**: exported reports now include a per-device signal/range-test section with the measured RSSI and timestamp
 
+## Overview Cards Open the Clicked Detector
+Clicking a detector card on the Overview page now jumps straight to that detector instead of just opening the device list.
+
+- **Device Details / Alarm Log deep link**: normal cards open the **Device Details** dialog of the clicked detector, alarming cards open its **Alarm Log**. Implemented as `/gateway/smoke-detectors?details=<id>` and `?alarmlog=<id>`; the parameter is removed from the URL right after the dialog opens, so a reload or the back button does not reopen it. Unknown or deleted ids simply show the list
+- **Cards are plain for non-admins**: Device Management is admin-only and used to bounce other users straight back to the Overview, so their cards are no longer rendered as links
+
 ## Robust Packet Classification by Message-Type Byte
 Packets are now identified by the radio module's on-air **message-type byte** (offset 27), with packet length used only as a validator - replacing the previous length-only heuristic.
 

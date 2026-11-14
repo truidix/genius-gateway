@@ -22,7 +22,12 @@ The health indicator icon in the navigation bar reflects the overall system stat
 
 ## Device Status Grid
 
-The Overview page displays all registered smoke detectors in a responsive grid layout. Each card is a link to the [Device Management](device-management.md) page. Clicking any card opens the full device list.
+The Overview page displays all registered smoke detectors in a responsive grid layout. Each card is a shortcut into the [Device Management](device-management.md) page for that detector:
+
+- **Normal cards** open the **Device Details** dialog of the clicked detector on top of the device list.
+- **Alarming cards** open the **Alarm Log** of the clicked detector instead.
+
+Device Management is only available to administrators, so for other users the cards are shown without a link.
 
 ### Card Color States
 
