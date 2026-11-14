@@ -19,8 +19,8 @@ jobs:
         with:
           path: ~/.platformio
           key: pio-${{ hashFiles('platformio.ini') }}
-      - name: Install PlatformIO core (pioarduino fork, matches the pioarduino platform)
-        run: pip install https://github.com/pioarduino/platformio-core/archive/refs/tags/v6.2.0.post1.zip
+      - name: Install PlatformIO core (6.2.x pulls a SCons that breaks the pioarduino platform)
+        run: pip install platformio==6.1.19
       - name: UI type check (informational, repo has pre-existing errors)
         run: cd interface && npm install --no-package-lock && npm run check || true
       - run: pio run -e gg-v1_0
