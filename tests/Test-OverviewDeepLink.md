@@ -5,7 +5,7 @@ The page does not change (the URL stays on `/`):
 
 | Card | Result |
 |------|--------|
-| normal | read-only **Device Details** dialog of that detector |
+| normal | **Device Details** dialog of that detector (pencil in the header opens the edit dialog) |
 | alarming | **Alarm Log** dialog of that detector |
 
 Acoustic readout ("Update") and "Set Alarm Line manually" are not offered here, they stay on the
