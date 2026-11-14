@@ -36,7 +36,7 @@ Home Assistant never changes an entity ID once it is registered, so renaming a d
 
 - **New opt-in setting in the Home Assistant Integration card**: "Update entity IDs when a detector's location changes" (`rename_entity_ids` in `/rest/haSettings`, off by default, only shown while the integration is enabled)
 - **Detectors are named after their location** in Home Assistant when the setting is on (the model name is used when no location is set)
-- **On a location change** the detector's retained discovery configs are cleared and republished, so Home Assistant creates new entity IDs from the new name. The entity history is lost and references to the old IDs must be updated
+- **On a location change** the detector's retained discovery configs are cleared and republished with an explicit `default_entity_id` built from the new name, so Home Assistant creates new entity IDs (e.g. `sensor.julian_alarm_line`). The entity history is lost and references to the old IDs must be updated
 - **With the setting off**, behavior is unchanged: the name stays the model name and only the suggested area is updated
 
 ## Bugfixes

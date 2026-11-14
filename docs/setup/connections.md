@@ -127,7 +127,7 @@ Name shown in Home Assistant's device registry. The factory default is `Genius G
 
 Opt-in, off by default, and only shown while the integration is enabled. Home Assistant never changes an entity ID after it was first registered, so renaming a detector's location normally leaves IDs such as `sensor.julian_austausch_genius_plus_x_alarm_line` untouched.
 
-With this option enabled, detectors are named after their location in Home Assistant (the model name is used if no location is set). When the location of a detector changes, the gateway removes its entities from Home Assistant and publishes them again, so Home Assistant generates new entity IDs from the new name (e.g. `sensor.julian_alarm_line`).
+With this option enabled, detectors are named after their location in Home Assistant (the model name is used if no location is set). When the location of a detector changes, the gateway removes its entities from Home Assistant and publishes them again together with an explicit entity ID built from the new name (e.g. `sensor.julian_alarm_line`). This needs a Home Assistant version that supports `default_entity_id` in MQTT discovery (tested with 2026.11).
 
 !!! warning "History and references are lost"
     The old entities are removed, so their recorded history is not carried over. Automations, scripts and dashboards that reference the old entity IDs must be updated. Two detectors with the same location get a numeric suffix (`_2`) from Home Assistant.

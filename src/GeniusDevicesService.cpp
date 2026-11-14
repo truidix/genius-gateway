@@ -1211,6 +1211,7 @@ void GeniusDevicesService::_addSmokeDetectorSubDevice(const GeniusDevice &device
         identity.configurationUrl = "http://" + localIP.toString() + "/gateway/smoke-detectors";
 
     auto dev = std::make_unique<HADevice>(_haService, std::move(identity));
+    dev->setEntityIdFromName(_haService->renameEntityIds() && !device.location.isEmpty());
 
     // ---- Smoke alarm binary_sensor (Control) - reads live from _state.devices ----
     auto sensor = std::make_unique<HABinarySensor>(_haService, "smoke",
@@ -1428,12 +1429,14 @@ void GeniusDevicesService::_syncSmokeDetectorSubDevices()
                     it->second.device->unpublishAll();
                     if (it->second.diagnostics)
                         it->second.diagnostics->unpublishAll();
-                    // Give HA time to finish removing the old entities (incl. their registry
-                    // entries) before the new configs arrive. If the new config lands while the
-                    // old entity is still being removed, HA treats it as an update of the same
-                    // entity and keeps the old entity_id. Zigbee2MQTT waits about 2 s here too.
-                    vTaskDelay(pdMS_TO_TICKS(2500));
+                    // Give HA time to finish removing the old entities before the new
+                    // configs arrive. HA remembers removed entities and restores their old
+                    // entity_id when the same unique_id comes back, so the new configs also
+                    // carry an explicit default_entity_id (see HADevice::setEntityIdFromName).
+                    vTaskDelay(pdMS_TO_TICKS(3000));
                 }
+
+                it->second.device->setEntityIdFromName(_haService->renameEntityIds() && !device.location.isEmpty());
 
                 id.name = newName;
                 id.serialNumber = String(device.smokeDetector.sn);
