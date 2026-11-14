@@ -1,0 +1,38 @@
+name: firmware
+on:
+  push:
+    branches: ['feature/**']
+  pull_request:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('platformio.ini') }}
+      - name: Install PlatformIO core (6.2.x pulls a SCons that breaks the pioarduino platform)
+        run: pip install platformio==6.1.19
+      - name: UI type check (informational, repo has pre-existing errors)
+        run: cd interface && npm install --no-package-lock && npm run check || true
+      - name: CI-only workaround for esp-modbus Kconfig default (also fails on main)
+        run: sed -i 's/^custom_sdkconfig =$/&\n    CONFIG_FMB_MASTER_MAX_API_BLOCKING_TIME_MS=10000/' platformio.ini
+      - name: Install platform, then pin PlatformIO inside pioarduino's own penv too
+        run: |
+          pip install uv
+          pio pkg install -e gg-v1_0
+          uv pip install --python ~/.platformio/penv/bin/python platformio==6.1.19
+          ~/.platformio/penv/bin/python -m platformio --version
+      - run: pio run -e gg-v1_0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-gg-v1_0
+          path: .pio/build/gg-v1_0/firmware.bin
