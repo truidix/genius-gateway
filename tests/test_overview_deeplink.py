@@ -101,6 +101,42 @@ with sync_playwright() as p:
         ctx.close()
     check('smoke detector list opens no dialog by itself (regression)', t_list_untouched)
 
+    def edit_flow(pg, expect_url_suffix):
+        pg.locator('button[aria-label="Edit smoke detector"]:visible', has_text='').last.click()
+        expect(pg.get_by_text('Edit smoke detector').first).to_be_visible(timeout=8000)
+        expect(pg.get_by_text('Device Details')).to_have_count(0, timeout=5000)
+        assert pg.url.rstrip('/') == BASE + expect_url_suffix, f'unexpected url {pg.url}'
+
+    def t_edit_overview():
+        ctx, pg = new_page()
+        pg.locator('button[aria-label^="Open details of Test 1 - Healthy"]:visible').first.click()
+        expect(pg.get_by_text('Device Details').first).to_be_visible(timeout=8000)
+        edit_flow(pg, '')
+        pg.get_by_role('button', name='Save').locator('visible=true').first.click()
+        expect(pg.get_by_text('Smoke detector saved.')).to_be_visible(timeout=8000)
+        on_overview(pg)
+        assert len(ctx.request.get(BASE + '/__puts').json()) == 1, 'expected exactly one PUT'
+        ctx.close()
+    check('overview details: pencil opens edit dialog; save PUTs and stays on the overview', t_edit_overview)
+
+    def t_edit_list():
+        ctx = b.new_context(viewport={'width': 1280, 'height': 900}); login(ctx)
+        pg = ctx.new_page(); pg.goto(BASE + '/gateway/smoke-detectors')
+        expect(pg.get_by_text('Test 1 - Healthy').locator('visible=true').first).to_be_visible(timeout=8000)
+        pg.locator('button[aria-label="Device details"]:visible').first.click()
+        expect(pg.get_by_text('Device Details').first).to_be_visible(timeout=8000)
+        edit_flow(pg, '/gateway/smoke-detectors')
+        ctx.close()
+    check('list page details: pencil opens edit dialog', t_edit_list)
+
+    def t_no_pencil_alarm_log():
+        ctx, pg = new_page()
+        pg.locator('button[aria-label^="Open alarm log"]:visible').first.click()
+        expect(pg.get_by_text('Alarms log').first).to_be_visible(timeout=8000)
+        assert pg.locator('button[aria-label="Edit smoke detector"]').count() == 0
+        ctx.close()
+    check('alarm log dialog has no edit pencil', t_no_pencil_alarm_log)
+
     b.close()
 
 for n, ok, msg in results: print(('PASS ' if ok else 'FAIL ') + n + (('  -> ' + msg) if msg else ''))
