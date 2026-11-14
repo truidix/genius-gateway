@@ -23,6 +23,14 @@ jobs:
         run: pip install platformio==6.1.19
       - name: UI type check (informational, repo has pre-existing errors)
         run: cd interface && npm install --no-package-lock && npm run check || true
+      - name: CI-only workaround for esp-modbus Kconfig default (also fails on main)
+        run: sed -i 's/^custom_sdkconfig =$/&\n    CONFIG_FMB_MASTER_MAX_API_BLOCKING_TIME_MS=10000/' platformio.ini
+      - name: Install platform, then pin PlatformIO inside pioarduino's own penv too
+        run: |
+          pip install uv
+          pio pkg install -e gg-v1_0
+          uv pip install --python ~/.platformio/penv/bin/python platformio==6.1.19
+          ~/.platformio/penv/bin/python -m platformio --version
       - run: pio run -e gg-v1_0
       - uses: actions/upload-artifact@v4
         with:
